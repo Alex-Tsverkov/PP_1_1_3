@@ -1,0 +1,36 @@
+# Скомпилированные классы
+*.class
+
+# Папки с результатами сборки
+target/
+build/
+dist/
+out/
+
+# Файлы IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+
+# Файлы от Maven
+.mvn/
+!.mvn/wrapper/maven-wrapper.properties
+
+# Файлы от Gradle
+.gradle/
+gradle-app.setting
+build/
+
+# Логи
+*.log
+logs/
+
+# Локальные настройки
+local.properties
+config.properties
+
+# Файлы ОС
+.DS_Store
+Thumbs.db
