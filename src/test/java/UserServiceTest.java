@@ -1,12 +1,24 @@
 import jm.task.core.jdbc.model.User;
 import jm.task.core.jdbc.service.UserService;
 import jm.task.core.jdbc.service.UserServiceImpl;
+import org.junit.After; // Добавлен импорт After
 import org.junit.Assert;
+import org.junit.Before; // Добавлен импорт Before
 import org.junit.Test;
 
 import java.util.List;
 
 public class UserServiceTest {
+
+    static {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+        } catch (ClassNotFoundException e) {
+            System.err.println("Не удалось загрузить JDBC драйвер MySQL.");
+            e.printStackTrace();
+        }
+    }
+
     private final UserService userService = new UserServiceImpl();
 
     private final String testName = "Ivan";
@@ -14,20 +26,29 @@ public class UserServiceTest {
     private final byte testAge = 5;
 
 
-    @Test
-    public void dropUsersTable() {
+    @Before
+    public void setUp() {
         try {
             userService.dropUsersTable();
-            userService.dropUsersTable();
+            userService.createUsersTable();
         } catch (Exception e) {
-            Assert.fail("При тестировании удаления таблицы произошло исключение\n" + e);
+            Assert.fail("Ошибка подготовки тестовой среды: " + e.getMessage());
         }
     }
+
+    @After
+    public void tearDown() {
+        try {
+            userService.dropUsersTable();
+        } catch (Exception e) {
+            System.err.println("Ошибка очистки тестовой среды после выполнения теста.");
+        }
+    }
+
 
     @Test
     public void createUsersTable() {
         try {
-            userService.dropUsersTable();
             userService.createUsersTable();
         } catch (Exception e) {
             Assert.fail("При тестировании создания таблицы пользователей произошло исключение\n" + e.getMessage());
@@ -37,8 +58,7 @@ public class UserServiceTest {
     @Test
     public void saveUser() {
         try {
-            userService.dropUsersTable();
-            userService.createUsersTable();
+            // setUp() уже создал таблицу
             userService.saveUser(testName, testLastName, testAge);
 
             User user = userService.getAllUsers().get(0);
@@ -58,10 +78,13 @@ public class UserServiceTest {
     @Test
     public void removeUserById() {
         try {
-            userService.dropUsersTable();
-            userService.createUsersTable();
-            userService.saveUser(testName, testLastName, testAge);
+            // setUp() уже создал таблицу
+            userService.saveUser(testName, testLastName, testAge); // Добавляем пользователя для удаления
             userService.removeUserById(1L);
+
+            List<User> userList = userService.getAllUsers();
+            Assert.assertTrue("Пользователь не был удален из базы данных", userList.isEmpty());
+
         } catch (Exception e) {
             Assert.fail("При тестировании удаления пользователя по id произошло исключение\n" + e);
         }
@@ -70,8 +93,7 @@ public class UserServiceTest {
     @Test
     public void getAllUsers() {
         try {
-            userService.dropUsersTable();
-            userService.createUsersTable();
+            // setUp() уже создал таблицу
             userService.saveUser(testName, testLastName, testAge);
             List<User> userList = userService.getAllUsers();
 
@@ -86,8 +108,7 @@ public class UserServiceTest {
     @Test
     public void cleanUsersTable() {
         try {
-            userService.dropUsersTable();
-            userService.createUsersTable();
+            // setUp() уже создал таблицу
             userService.saveUser(testName, testLastName, testAge);
             userService.cleanUsersTable();
 
@@ -98,5 +119,4 @@ public class UserServiceTest {
             Assert.fail("При тестировании очистки таблицы пользователей произошло исключение\n" + e);
         }
     }
-
 }
